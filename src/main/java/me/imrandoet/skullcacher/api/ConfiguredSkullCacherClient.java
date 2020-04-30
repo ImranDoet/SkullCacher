@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,7 +23,7 @@ public class ConfiguredSkullCacherClient implements SkullCacherClient {
     private JsonParser jsonParser = new JsonParser(); // Always have one instance of the JSON parser so we dont get issues (static methods on JsonParser throw NoSuchMethodExceptions)
     private Logger logger; // Logger that the user can set
 
-    private static final String TEXTURES_URL = "https://sessionserver.mojang.com/session/minecraft/profile/%s?unsigned=false";
+    private static final String PROFILE_URL = "https://sessionserver.mojang.com/session/minecraft/profile/%s?unsigned=false";
 
     /**
      * Creates new client
@@ -86,7 +83,7 @@ public class ConfiguredSkullCacherClient implements SkullCacherClient {
         pool.execute(() -> {
             try {
                 skullCacheCallback.start();
-                HttpURLConnection connection = (HttpURLConnection) new URL(String.format(TEXTURES_URL, playerUUID.toString().replace("-", ""))).openConnection(); //Opens connection to the given url, removes dashes in UUIDs because mojang's api doesn't like those
+                HttpURLConnection connection = (HttpURLConnection) new URL(String.format(PROFILE_URL, playerUUID.toString().replace("-", ""))).openConnection(); //Opens connection to the given url, removes dashes in UUIDs because mojang's api doesn't like those
                 connection.setReadTimeout(10000); // Timeout of 10seconds (10 000 ms)
 
                 if (connection.getResponseCode() != 200) { // Welp, the status isn't a 200 OK so it's not a success
@@ -141,6 +138,7 @@ public class ConfiguredSkullCacherClient implements SkullCacherClient {
             skullCacheCallback.success(texture);
         } else skullCacheCallback.fail();
     }
+
 
     public void saveTexture(Texture texture) {
         JsonObject jsonObject = new JsonObject();
